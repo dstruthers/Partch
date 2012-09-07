@@ -1,0 +1,5 @@
+Partch - by Darren Struthers <dstruthers@gmail.com>
+
+This is a simple Haskell library for working with Partch tonality diamonds and
+related scales. The code is available under the terms of the X11 license.
+See LICENSE for more information.
