@@ -1,24 +1,16 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Partch where
 import Data.Array
-import Data.List (nub, sort)
+import Data.List (intercalate, nub, sort)
 import Data.Ratio
 
-data Interval = Interval { fromInterval :: Ratio Int }
-              deriving (Eq, Ord)
+newtype Interval = Interval { fromInterval :: Ratio Int }
+              deriving (Eq, Num, Ord)
                        
-type Diamond = Array (Int, Int) Interval
-
-instance Num Interval where
-  (Interval r1) + (Interval r2) = simplify $ Interval $ r1 + r2
-  (Interval r1) - (Interval r2) = simplify $ Interval $ r1 - r2
-  (Interval r1) * (Interval r2) = simplify $ Interval $ r1 * r2
-  negate (Interval r) = simplify $ Interval $ negate r
-  abs (Interval r) = simplify $ Interval $ abs r
-  signum (Interval r) = Interval $ signum r
-  fromInteger n = Interval $ fromInteger n
-  
 instance Show Interval where
   show (Interval r) = show (numerator r) ++ ":" ++ show (denominator r)
+
+type Diamond = Array (Int, Int) Interval
 
 -- Some convenient interval definitions
 unison   = Interval (1%1)
@@ -59,8 +51,9 @@ limit :: Diamond -> Int
 limit d = (snd . snd . bounds $ d) * 2 + 1
 
 cents :: Interval -> Double
-cents (Interval r) = let approxRatio = (fromIntegral . numerator $ r) / (fromIntegral . denominator $ r)
-                     in 1200 * logBase 2 approxRatio
+cents (Interval r) = let numer = fromIntegral . numerator $ r
+                         denom = fromIntegral . denominator $ r
+                     in 1200 * logBase 2 (numer / denom)
 
 showDiamond :: Diamond -> String
 showDiamond d = concat . map showRow . showOffsets $ d
