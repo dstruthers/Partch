@@ -33,7 +33,7 @@ octaveUp (Interval r) = Interval $ (2 * numerator r) % denominator r
 octaveDown (Interval r) = Interval $ numerator r % (denominator r * 2)
 
 isSimple :: Interval -> Bool
-isSimple (Interval r) = r >= 1 && r <= 2
+isSimple (Interval r) = r >= 1 && r < 2
 
 simplify :: Interval -> Interval
 simplify i = if isSimple i
@@ -55,4 +55,5 @@ diamondList :: Int -> [Interval]
 diamondList n = nub $ sort [x * y | x <- otones n, y <- utones n]
 
 diamondArray :: Int -> Array (Int, Int) Interval
-diamondArray n = array ((1,1), (n,n)) [((x,y), otone x * utone y) | x <- [1..n], y <- [1..n]]
+diamondArray n = listArray ((0,0), (n `div` 2, n `div` 2)) 
+                 [otone x * utone y | x <- filter odd [1..n], y <- filter odd [1..n]]
