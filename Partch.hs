@@ -12,10 +12,7 @@ instance Num Interval where
   (Interval r1) * (Interval r2) = simplify $ Interval $ r1 * r2
   negate (Interval r) = simplify $ Interval $ negate r
   abs (Interval r) = simplify $ Interval $ abs r
-  signum (Interval r) = case compare r 0 of
-    LT -> -1
-    EQ -> 0
-    GT -> 1
+  signum (Interval r) = Interval $ signum r
   fromInteger n = Interval $ fromInteger n
   
 instance Show Interval where
@@ -38,9 +35,7 @@ isSimple (Interval r) = r >= 1 && r < 2
 simplify :: Interval -> Interval
 simplify i = if isSimple i
              then i
-             else simplify $ case compare i unison of
-               LT -> octaveUp i
-               GT -> octaveDown i
+             else simplify $ if i < unison then octaveUp i else octaveDown i
 
 inverse :: Interval -> Interval
 inverse = simplify . Interval . recip . fromInterval
@@ -63,7 +58,7 @@ showDiamond d = concat . map showRow . showOffsets $ d
   where showRow r = rowPadding r ++ (concat $ map (showCol . (d!)) r) ++ "\n"
         maxCols = maximum . map length . showOffsets $ d
         rowPadding r = replicate ((maxCols - length r) * maxColSize `div` 2) ' '
-        maxColSize = (+2) . maximum $ map (length . show) (elems d)
+        maxColSize = (maximum $ map (length . show) (elems d)) + 2
         showCol c = let colSize = length . show $ c
                         spacesLeft = (maxColSize - colSize) `div` 2
                         spacesRight = spacesLeft + (maxColSize - colSize) `mod` 2
@@ -81,4 +76,3 @@ showOffsets d = map getRow [1..limit]
                                else swap . colAt n
                    in map colFn [0..numCols n - 1]
         colAt row col = (0 + col, distFromCtr row + col)
-          
