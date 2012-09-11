@@ -5,6 +5,8 @@ import Data.Ratio
 
 data Interval = Interval { fromInterval :: Ratio Int }
               deriving (Eq, Ord)
+                       
+type Diamond = Array (Int, Int) Interval
 
 instance Num Interval where
   (Interval r1) + (Interval r2) = simplify $ Interval $ r1 + r2
@@ -46,14 +48,17 @@ utone = simplify . Interval . (1%)
 otones n = map otone . filter odd $ [1..n]
 utones n = map utone . filter odd $ [1..n]
 
-diamondList :: Int -> [Interval]
-diamondList n = nub $ sort [x * y | x <- otones n, y <- utones n]
+scale :: Int -> [Interval]
+scale n = nub $ sort [x * y | x <- otones n, y <- utones n]
 
-diamondArray :: Int -> Array (Int, Int) Interval
-diamondArray n = listArray ((0,0), (n `div` 2, n `div` 2)) 
+diamond :: Int -> Diamond
+diamond n = listArray ((0,0), (n `div` 2, n `div` 2)) 
                  [otone x * utone y | x <- filter odd [1..n], y <- filter odd [1..n]]
 
-showDiamond :: Array (Int, Int) Interval -> String
+limit :: Diamond -> Int
+limit d = (snd . snd . bounds $ d) * 2 + 1
+
+showDiamond :: Diamond -> String
 showDiamond d = concat . map showRow . showOffsets $ d
   where showRow r = rowPadding r ++ (concat $ map (showCol . (d!)) r) ++ "\n"
         maxCols = maximum . map length . showOffsets $ d
@@ -64,10 +69,9 @@ showDiamond d = concat . map showRow . showOffsets $ d
                         spacesRight = spacesLeft + (maxColSize - colSize) `mod` 2
                     in (replicate spacesLeft ' ') ++ show c ++ (replicate spacesRight ' ')
                        
-showOffsets :: Array (Int, Int) Interval -> [[(Int, Int)]]
-showOffsets d = map getRow [1..limit]
-  where limit = (snd . snd . bounds $ d) * 2 + 1
-        maxCols = limit `div` 2 + 1
+showOffsets :: Diamond -> [[(Int, Int)]]
+showOffsets d = map getRow [1..limit d]
+  where maxCols = limit d `div` 2 + 1
         distFromCtr n = abs (maxCols - n)
         numCols n = maxCols - distFromCtr n
         swap (x,y) = (y,x)
