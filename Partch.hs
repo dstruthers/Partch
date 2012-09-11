@@ -57,3 +57,28 @@ diamondList n = nub $ sort [x * y | x <- otones n, y <- utones n]
 diamondArray :: Int -> Array (Int, Int) Interval
 diamondArray n = listArray ((0,0), (n `div` 2, n `div` 2)) 
                  [otone x * utone y | x <- filter odd [1..n], y <- filter odd [1..n]]
+
+showDiamond :: Array (Int, Int) Interval -> String
+showDiamond d = concat . map showRow . showOffsets $ d
+  where showRow r = rowPadding r ++ (concat $ map (showCol . (d!)) r) ++ "\n"
+        maxCols = maximum . map length . showOffsets $ d
+        rowPadding r = replicate ((maxCols - length r) * maxColSize `div` 2) ' '
+        maxColSize = (+2) . maximum $ map (length . show) (elems d)
+        showCol c = let colSize = length . show $ c
+                        spacesLeft = (maxColSize - colSize) `div` 2
+                        spacesRight = spacesLeft + (maxColSize - colSize) `mod` 2
+                    in (replicate spacesLeft ' ') ++ show c ++ (replicate spacesRight ' ')
+                       
+showOffsets :: Array (Int, Int) Interval -> [[(Int, Int)]]
+showOffsets d = map getRow [1..limit]
+  where limit = (snd . snd . bounds $ d) * 2 + 1
+        maxCols = limit `div` 2 + 1
+        distFromCtr n = abs (maxCols - n)
+        numCols n = maxCols - distFromCtr n
+        swap (x,y) = (y,x)
+        getRow n = let colFn = if n > maxCols
+                               then colAt n
+                               else swap . colAt n
+                   in map colFn [0..numCols n - 1]
+        colAt row col = (0 + col, distFromCtr row + col)
+          
