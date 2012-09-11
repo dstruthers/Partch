@@ -54,19 +54,23 @@ scale n = nub $ sort [x * y | x <- otones n, y <- utones n]
 diamond :: Int -> Diamond
 diamond n = listArray ((0,0), (n `div` 2, n `div` 2)) 
                  [otone x * utone y | x <- filter odd [1..n], y <- filter odd [1..n]]
-
+            
 limit :: Diamond -> Int
 limit d = (snd . snd . bounds $ d) * 2 + 1
+
+cents :: Interval -> Double
+cents (Interval r) = let approxRatio = (fromIntegral . numerator $ r) / (fromIntegral . denominator $ r)
+                     in 1200 * logBase 2 approxRatio
 
 showDiamond :: Diamond -> String
 showDiamond d = concat . map showRow . showOffsets $ d
   where showRow r = rowPadding r ++ (concat $ map (showCol . (d!)) r) ++ "\n"
         maxCols = maximum . map length . showOffsets $ d
         rowPadding r = replicate ((maxCols - length r) * maxColSize `div` 2) ' '
-        maxColSize = (maximum $ map (length . show) (elems d)) + 2
+        maxColSize = (maximum $ map (length . show) (elems d)) * 2
         showCol c = let colSize = length . show $ c
-                        spacesLeft = (maxColSize - colSize) `div` 2
-                        spacesRight = spacesLeft + (maxColSize - colSize) `mod` 2
+                        spacesRight = (maxColSize - colSize) `div` 2
+                        spacesLeft = spacesRight + (maxColSize - colSize) `mod` 2
                     in (replicate spacesLeft ' ') ++ show c ++ (replicate spacesRight ' ')
                        
 showOffsets :: Diamond -> [[(Int, Int)]]
