@@ -51,5 +51,8 @@ utone = simplify . Interval . (1%)
 otones n = map otone . filter odd $ [1..n]
 utones n = map utone . filter odd $ [1..n]
 
-diamond :: Int -> [Interval]
-diamond n = nub $ sort [x * y | x <- otones n, y <- utones n]
+diamondList :: Int -> [Interval]
+diamondList n = nub $ sort [x * y | x <- otones n, y <- utones n]
+
+diamondArray :: Int -> Array (Int, Int) Interval
+diamondArray n = array ((1,1), (n,n)) [((x,y), otone x * utone y) | x <- [1..n], y <- [1..n]]
