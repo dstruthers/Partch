@@ -73,17 +73,19 @@ cents (Interval r) = let numer = fromIntegral . numerator $ r
                          denom = fromIntegral . denominator $ r
                      in 1200 * logBase 2 (numer / denom)
 
--- | Produces a text representation of a @Diamond@ suitable for displaying in a terminal
+-- | Produces a text representation of a @Diamond@ suitable for displaying in a
+-- terminal
 showDiamond :: Diamond -> String
 showDiamond d = concat . map showRow . diamondOffsets $ d
   where showRow r    = rowPadding r ++ (concat $ map (showCol . (d!)) r) ++ "\n"
         maxCols      = maximum . map length . diamondOffsets $ d
-        rowPadding r = replicate ((maxCols - length r) * maxColSize `div` 2) ' '
+        pad          = (flip replicate) ' '
+        rowPadding r = pad ((maxCols - length r) * maxColSize `div` 2)
         maxColSize   = (maximum $ map (length . show) (elems d)) * 2
         showCol c    = let colSize     = length . show $ c
                            spacesRight = (maxColSize - colSize) `div` 2
                            spacesLeft  = spacesRight + (maxColSize - colSize) `mod` 2
-                       in (replicate spacesLeft ' ') ++ show c ++ (replicate spacesRight ' ')
+                       in pad spacesLeft ++ show c ++ pad spacesRight
                        
 -- | Produces a list of lists of @Diamond@ array indices, suitable for passing to 
 -- visual rendering function
